@@ -66,10 +66,7 @@ def sanity_checks(request):
         flash("Wrong scantype!")
         ok = False
 
-    if 'starttls' in request.form and request.form['starttls'] == "yes":
-        starttls = True
-    else:
-        starttls = False
+    starttls = ('starttls' in request.form and request.form['starttls'] == "yes")
 
     protocol = request.form['protocol']
     if starttls and protocol not in protocols:
@@ -103,31 +100,24 @@ def main():
             return render_template("main.html")
 
         # Build command line
-        testssl_args = [checkCmd]
-        testssl_args += checkArgs
+        testssl_args = [checkCmd, *checkArgs]
 
         testssl_args.append("--debug="+str(testsslDebug))
 
         if scantype == "normal":
-            testssl_args.append("--protocols")
-            testssl_args.append("--cipher-per-proto")
-            testssl_args.append("--fs")
-            testssl_args.append("--rc4")
-            testssl_args.append("--vulnerable")
-
-        if scantype == "quick":
-            testssl_args.append("--protocols")
-            testssl_args.append("--cipher-per-proto")
-            testssl_args.append("--server-defaults")
+            # testssl_args += ["--protocols", "--cipher-per-proto", "--fs", "--rc4", "--vulnerable"]
+            pass
+        elif scantype == "quick":
+            testssl_args += ["--protocols", "--cipher-per-proto", "--server-defaults"]
 
         if starttls:
             testssl_args.append("-t")
             testssl_args.append(protocol)
 
         testssl_args.append(host + ":" + str(port))
+
         # Build render command line
-        render_args = [rendererCmd]
-        render_args += rendererArgs
+        render_args = [rendererCmd, *rendererArgs]
 
         # Perform test
 

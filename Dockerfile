@@ -5,6 +5,8 @@ ADD static /testssl/static
 ADD templates /testssl/templates
 ADD SSLTestPortal.py /testssl/SSLTestPortal.py
 
+ENV TESTSSL_CMD=/testssl/testssl.sh
+
 RUN apk update && apk upgrade && \
     apk add --update --no-cache python3 py3-pip aha git bash coreutils procps && \
     ln -sf python3 /usr/bin/python && \

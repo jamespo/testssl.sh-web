@@ -12,7 +12,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from flask import Flask, Response, request, redirect, session, render_template, url_for, flash, escape, stream_with_context
+from flask import Flask, Response, request, redirect, session, render_template, url_for, flash, stream_with_context
 import os
 from os import urandom
 from subprocess import Popen, PIPE, CalledProcessError, TimeoutExpired
@@ -24,8 +24,9 @@ SENTINEL = '------------SPLIT----------HERE---------'
 application = Flask(__name__)
 
 ### Configuration ###
-checkCmd = "/testssl.sh/testssl.sh"
-checkArgs = ["--quiet", "--add-ca=/etc/ssl/certs/ca-certificates.pem"]
+checkCmd = os.environ.get("TESTSSL_CMD", "testssl.sh/testssl.sh")
+checkArgs = ["--quiet", "--add-ca=%s" % os.environ.get("TESTSSL_CA",
+                                                       "/etc/ssl/certs/ca-certificates.pem")]
 checkTimeout = int(os.environ.get("CHECKTIMEOUT", default=300))
 testsslDebug = int(os.environ.get("TESTSSLDEBUG", default=0))
 rendererCmd = "aha"
@@ -164,4 +165,5 @@ def about():
     return render_template("about.html", about=str(html, 'utf-8'))
 
 if __name__ == "__main__":
-    application.run(host='0.0.0.0')
+    application.run(host=os.environ.get("TESTSSL_WEB_HOST", "0.0.0.0"),
+                    port=os.environ.get("TESTSSL_WEB_PORT", 5000))

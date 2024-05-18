@@ -6,6 +6,8 @@
 
 This project is a web interface for [testssl.sh](https://testssl.sh/). It can be used to offer internal TLS/SSL configuration check portals, whereever the usual public tools are not applicable. It is available as Docker image.
 
+Based on [mailsvb fork](https://github.com/mailsvb/testssl.sh-web).
+
 ## Installation
 
 `docker run -p 5000:5000 mailsvb/testssl.sh-web:latest`
@@ -13,6 +15,18 @@ This project is a web interface for [testssl.sh](https://testssl.sh/). It can be
 In case you need to validate against specific root certificates, you can mount a folder containing your root certificates (*.pem) into the container. E.g.
 
 `docker run -p 5000:5000 -v /your/certificates/folder/:/etc/ssl/certs/ mailsvb/testssl.sh-web:latest`
+
+## Customization
+
+A few optional environment variables are available, example usage:
+
+	TESTSSL_CMD=/bin/testssl.sh
+	TESTSSL_CA=/opt/homebrew/etc/openssl@3/cert.pem
+	TESTSSL_WEB_HOST=127.0.0.1
+	TESTSSL_WEB_PORT=5500
+
+	CHECKTIMEOUT=120
+	TESTSSLDEBUG=1
 
 ## NGINX Reverse Proxy
 

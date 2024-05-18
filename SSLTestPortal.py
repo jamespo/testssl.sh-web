@@ -12,10 +12,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from flask import Flask, Response, request, redirect, session, render_template, url_for, flash, stream_with_context
+from flask import Flask, Response, request, render_template, flash, stream_with_context
 import os
 from os import urandom
-from subprocess import Popen, PIPE, CalledProcessError, TimeoutExpired
+from subprocess import Popen, PIPE
 import re
 import socket
 
@@ -34,12 +34,50 @@ rendererArgs = ["-n"]
 rendererTimeout = 30
 protocols = ["ftp", "smtp", "pop3", "imap", "xmpp", "telnet", "ldap"]
 scantypes = ["normal", "quick"]
-reHost = re.compile("^[a-zA-Z0-9_][a-zA-Z0-9_\-]+(\.[a-zA-Z0-9_\-]+)*$")
+reHost = re.compile("^[a-zA-Z0-9_][a-zA-Z0-9_-]+(.[a-zA-Z0-9_-]+)*$")
 preflightRequest = True
 preflightTimeout = 10
 application.debug = False
 application.secret_key = urandom(32)
 #####################
+
+def sanity_checks(request):
+    """run sanity checks on input"""
+    ok = True
+    host = request.form['host']
+    if not reHost.match(host):
+        flash("Wrong host name!")
+        ok = False
+    if host == "localhost" or host.find("127.") == 0 or host == "::1":
+        flash("I was already pentested ;)")
+        ok = False
+
+    try:
+        port = int(request.form['port'])
+        if not (port >= 0 and port <= 65535):
+            flash("Wrong port number!")
+            ok = False
+    except:
+        flash("Port number must be numeric")
+        ok = False
+
+    scantype = request.form['scantype']
+    if scantype not in scantypes:
+        flash("Wrong scantype!")
+        ok = False
+
+    if 'starttls' in request.form and request.form['starttls'] == "yes":
+        starttls = True
+    else:
+        starttls = False
+
+    protocol = request.form['protocol']
+    if starttls and protocol not in protocols:
+        flash("Wrong protocol!")
+        ok = False
+
+    return (ok, starttls, scantype, host, port, protocol)
+
 
 @application.route("/", methods=['GET', 'POST'])
 def main():
@@ -47,39 +85,8 @@ def main():
     if request.method == 'GET':                         # Main Page
         return render_template("main.html")
     elif request.method == 'POST':                      # Perform Test
-        # Sanity checks of request values
-        ok = True
-        host = request.form['host']
-        if not reHost.match(host):
-            flash("Wrong host name!")
-            ok = False
-        if host == "localhost" or host.find("127.") == 0 or host == "::1":
-            flash("I was already pentested ;)")
-            ok = False
-
-        try:
-            port = int(request.form['port'])
-            if not (port >= 0 and port <= 65535):
-                flash("Wrong port number!")
-                ok = False
-        except:
-            flash("Port number must be numeric")
-            ok = False
-
-        scantype = request.form['scantype']
-        if scantype not in scantypes:
-            flash("Wrong scantype!")
-            ok = False
-
-        if 'starttls' in request.form and request.form['starttls'] == "yes":
-            starttls = True
-        else:
-            starttls = False
-
-        protocol = request.form['protocol']
-        if starttls and protocol not in protocols:
-            flash("Wrong protocol!")
-            ok = False
+        # check request values
+        (ok, starttls, scantype, host, port, protocol) = sanity_checks(request)
 
         # Perform preflight request to prevent that testssl.sh runs into long timeout
         if ok and preflightRequest:
@@ -156,14 +163,14 @@ def about():
     render_args += rendererArgs
     # Get version output from testssl
     check = Popen(testssl_args, shell=False, stdout=PIPE, stderr=PIPE)
-    output, err = check.communicate()
+    output, _ = check.communicate()
     # Render output as HTML
     renderer = Popen(render_args, shell=False, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-    html, err = renderer.communicate(input=output)
+    html, _ = renderer.communicate(input=output)
     check.kill()
     renderer.kill()
     return render_template("about.html", about=str(html, 'utf-8'))
 
 if __name__ == "__main__":
     application.run(host=os.environ.get("TESTSSL_WEB_HOST", "0.0.0.0"),
-                    port=os.environ.get("TESTSSL_WEB_PORT", 5000))
+                    port=int(os.environ.get("TESTSSL_WEB_PORT", 5000)))

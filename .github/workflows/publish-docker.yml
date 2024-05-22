@@ -27,11 +27,11 @@ jobs:
         id: meta
         uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
         with:
-          images: mailsvb/testssl.sh-web
+          images: jamespo7/testssl.sh-webui
       
       - name: Build and push Docker image
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
           context: .
           push: true
-          tags: mailsvb/testssl.sh-web:latest,mailsvb/testssl.sh-web:${{ github.event.release.tag_name }}
+          tags: jamespo7/testssl.sh-webui:latest,jamespo7/testssl.sh-webui:${{ github.event.release.tag_name }}

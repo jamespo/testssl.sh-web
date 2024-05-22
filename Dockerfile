@@ -1,20 +1,31 @@
-FROM alpine:latest
+############################################################
+# Dockerfile to build testssl.sh WebFrontend
+# Based on Ubuntu
+############################################################
 
-RUN mkdir -p /testssl/log && mkdir -p /testssl/result/html && mkdir -p testssl/result/json
-ADD static /testssl/static
-ADD templates /testssl/templates
-ADD SSLTestPortal.py /testssl/SSLTestPortal.py
+# Set the base image to Ubuntu
+FROM ubuntu:24.04
 
-ENV TESTSSL_CMD=/testssl/testssl.sh
+# File Author / Maintainer
+MAINTAINER James P
 
-RUN apk update && apk upgrade && \
-    apk add --update --no-cache python3 py3-pip aha git bash coreutils procps && \
-    ln -sf python3 /usr/bin/python && \
-    pip3 install flask &&\
-    git clone --depth 1 --branch v3.0.8 https://github.com/drwetter/testssl.sh.git /testssl.sh && \
-    apk del py3-pip git
+# Install Packages
+RUN DEBIAN_FRONTEND=noninteractive apt-get -qq update --fix-missing && \
+    apt-get --no-install-recommends -y install openssl net-tools dnsutils aha python3 \
+    python3-flask bsdmainutils ca-certificates && \
+    apt-get autoremove -y && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-RUN ln -s /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.pem
-WORKDIR /testssl
+# Copy the application folder inside the container
+ADD ./ /testssl
+
+# Create Log and  Result folder
+RUN mkdir -p /testssl/log /testssl/result/json /testssl/result/html
+
+# Expose ports
 EXPOSE 5000
-CMD python SSLTestPortal.py
+
+# Set the default directory where CMD will execute
+WORKDIR /testssl
+
+# Set the default command to execute    
+CMD python3 SSLTestPortal.py

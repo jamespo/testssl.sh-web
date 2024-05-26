@@ -34,4 +34,4 @@ jobs:
         with:
           context: .
           push: true
-          tags: jamespo7/testssl.sh-webui:latest,jamespo7/testssl.sh-webui:${{ github.event.release.tag_name }}
+          tags: jamespo7/testsslwebui:latest,jamespo7/testsslwebui:${{ github.event.release.tag_name }}

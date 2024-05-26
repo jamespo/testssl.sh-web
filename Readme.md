@@ -1,8 +1,8 @@
 # Web Front End for testssl.sh
 
-[![GitHub Workflow - CI](https://github.com/mailsvb/testssl.sh-web/workflows/build/badge.svg)](https://github.com/mailsvb/testssl.sh-web/actions?workflow=build)
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/mailsvb/testssl.sh-web)](https://github.com/mailsvb/testssl.sh-web/releases/latest)
-[![Docker Image Size (latest semver)](https://img.shields.io/docker/image-size/mailsvb/testssl.sh-web?sort=semver)](https://hub.docker.com/repository/docker/mailsvb/testssl.sh-web)
+[![GitHub Workflow - CI](https://github.com/jamespo/testssl.sh-webui/workflows/build/badge.svg)](https://github.com/jamespo/testssl.sh-webui/actions?workflow=build)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/jamespo/testssl.sh-webui)](https://github.com/jamespo/testssl.sh-webui/releases/latest)
+[![Docker Image Size (latest semver)](https://img.shields.io/docker/image-size/jamespo7/testsslwebui?sort=semver)](https://hub.docker.com/repository/docker/jamespo7/testsslwebui)
 
 This project is a web interface for [testssl.sh](https://testssl.sh/). It can be used to offer internal TLS/SSL configuration check portals, whereever the usual public tools are not applicable. It is available as Docker image.
 
@@ -10,11 +10,17 @@ Based on [mailsvb fork](https://github.com/mailsvb/testssl.sh-web).
 
 ## Installation
 
-`docker run -p 5000:5000 mailsvb/testssl.sh-web:latest`
+### Docker
+
+`docker run -p 5000:5000 jamespo7/testsslwebui:latest`
 
 In case you need to validate against specific root certificates, you can mount a folder containing your root certificates (*.pem) into the container. E.g.
 
-`docker run -p 5000:5000 -v /your/certificates/folder/:/etc/ssl/certs/ mailsvb/testssl.sh-web:latest`
+`docker run -p 5000:5000 -v /your/certificates/folder/:/etc/ssl/certs/ jamespo7/testsslwebui:latest`
+
+### Native
+
+`git clone --recursive git@github.com:jamespo/testssl.sh-webui.git`
 
 ## Customization
 

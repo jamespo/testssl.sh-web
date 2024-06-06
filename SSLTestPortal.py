@@ -115,8 +115,7 @@ def main():
             testssl_args += ["--protocols", "--cipher-per-proto", "--server-defaults"]
 
         if starttls:
-            testssl_args.append("-t")
-            testssl_args.append(protocol)
+            testssl_args += ["-t", protocol]
 
         testssl_args.append(host + ":" + str(port))
 
@@ -141,7 +140,7 @@ def main():
                     yield str(html, 'utf-8')
                     break
                 yield str(html, 'utf-8')
-            output, err = check.communicate(timeout=checkTimeout)
+            _, err = check.communicate(timeout=checkTimeout)
             if check.returncode > 128:
                 yield str(err, 'utf-8')
             yield last
@@ -154,10 +153,8 @@ def main():
 @application.route("/about/")
 def about():
     # Build commmands
-    testssl_args = [checkCmd]
-    testssl_args.append("--version")
-    render_args = [rendererCmd]
-    render_args += rendererArgs
+    testssl_args = [checkCmd, "--version"]
+    render_args = [rendererCmd, *rendererArgs]
     # Get version output from testssl
     check = Popen(testssl_args, shell=False, stdout=PIPE, stderr=PIPE)
     output, _ = check.communicate()

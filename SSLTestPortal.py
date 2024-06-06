@@ -13,6 +13,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from flask import Flask, Response, request, render_template, flash, stream_with_context
+import logging
 import os
 from os import urandom
 from subprocess import Popen, PIPE
@@ -20,6 +21,9 @@ import re
 import socket
 
 SENTINEL = '------------SPLIT----------HERE---------'
+
+logging.basicConfig()
+logger = logging.getLogger()
 
 application = Flask(__name__)
 
@@ -119,6 +123,9 @@ def main():
         # Build render command line
         render_args = [rendererCmd, *rendererArgs]
 
+        logger.debug("testssl_args: %s" % testssl_args)
+        logger.debug("render_args: %s" % render_args)
+
         # Perform test
 
         def runtest():
@@ -162,5 +169,9 @@ def about():
     return render_template("about.html", about=str(html, 'utf-8'))
 
 if __name__ == "__main__":
+    if os.getenv("SSLTESTDEBUG"):
+        logger.setLevel(logging.DEBUG)
+    else:
+        logger.setLevel(logging.ERROR)
     application.run(host=os.environ.get("TESTSSL_WEB_HOST", "0.0.0.0"),
                     port=int(os.environ.get("TESTSSL_WEB_PORT", 5000)))
